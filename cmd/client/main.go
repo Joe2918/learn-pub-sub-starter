@@ -39,7 +39,7 @@ func main() {
 		"army_moves."+gamestate.GetUsername(),
 		routing.ArmyMovesPrefix+".*",
 		pubsub.SimpleQueueTransient,
-		handlerMove(gamestate),
+		handlerMove(gamestate, publishCh),
 	)
 
 	if err != nil {
@@ -57,6 +57,19 @@ func main() {
 
 	if err != nil {
 		log.Fatalf("could not subscribe to pause: %v", err)
+	}
+
+	err = pubsub.SubscribeJSON(
+		conn,
+		routing.ExchangePerilTopic,
+		"war",
+		routing.WarRecognitionsPrefix+".*",
+		pubsub.SimpleQueueDurable,
+		handlerWar(gamestate),
+	)
+
+	if err != nil {
+		log.Fatalf("could not subscribe to war: %v", err)
 	}
 
 	for {

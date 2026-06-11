@@ -41,7 +41,9 @@ func DeclareAndBind(
 		queueType != SimpleQueueDurable,
 		queueType != SimpleQueueDurable,
 		false,
-		nil,
+		amqp.Table{
+			"x-dead-letter-exchange": "peril_dlx",
+		},
 	)
 	if err != nil {
 		return nil, amqp.Queue{}, fmt.Errorf("could not declare queue: %v", err)
@@ -83,7 +85,7 @@ func SubscribeJSON[T any](
 
 	msgs, err := ch.Consume(queue.Name, "", false, false, false, false, nil)
 	if err != nil {
-		return fmt.Errorf("could not consume messages: %v, err")
+		return fmt.Errorf("could not consume messages: %v", err)
 	}
 
 	go func() {
